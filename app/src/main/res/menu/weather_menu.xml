@@ -8,7 +8,7 @@
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_language"
-        android:icon="@drawable/ic_language"
+        android:icon="@drawable/ic_language_switch"
         android:title="@string/menu_language"
         app:showAsAction="ifRoom" />
 </menu>

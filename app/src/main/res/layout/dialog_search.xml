@@ -16,8 +16,10 @@
             android:id="@+id/input_search"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
             android:imeOptions="actionSearch"
-            android:inputType="textCapWords" />
+            android:inputType="text|textNoSuggestions"
+            android:textDirection="locale" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_sky_dark_top">#060D18</color>
+    <color name="bg_sky_dark_mid">#122438</color>
+    <color name="bg_sky_dark_bottom">#162032</color>
+    <color name="bg_moon_glow_dark">#406FA8D0</color>
+    <color name="bg_horizon_haze_dark">#99000000</color>
+</resources>

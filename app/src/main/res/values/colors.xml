@@ -2,4 +2,18 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Light theme sky background -->
+    <color name="bg_sky_light_top">#A8D4F0</color>
+    <color name="bg_sky_light_mid">#D4EAF7</color>
+    <color name="bg_sky_light_bottom">#F2F8FD</color>
+    <color name="bg_sun_glow_light">#55FFF8E1</color>
+    <color name="bg_horizon_haze_light">#66E8F1FC</color>
+
+    <!-- Dark theme sky (overridden in values-night for cohesion) -->
+    <color name="bg_sky_dark_top">#0A1628</color>
+    <color name="bg_sky_dark_mid">#152A45</color>
+    <color name="bg_sky_dark_bottom">#1B2638</color>
+    <color name="bg_moon_glow_dark">#284A78</color>
+    <color name="bg_horizon_haze_dark">#66000000</color>
 </resources>

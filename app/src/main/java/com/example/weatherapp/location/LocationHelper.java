@@ -90,20 +90,10 @@ public final class LocationHelper {
                             Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
                             List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
                             if (addresses != null && !addresses.isEmpty()) {
-                                Address a = addresses.get(0);
-                                StringBuilder sb = new StringBuilder();
-                                if (a.getLocality() != null) {
-                                    sb.append(a.getLocality());
-                                } else if (a.getSubAdminArea() != null) {
-                                    sb.append(a.getSubAdminArea());
-                                } else if (a.getFeatureName() != null) {
-                                    sb.append(a.getFeatureName());
-                                }
-                                if (a.getCountryName() != null && sb.length() > 0) {
-                                    sb.append(", ").append(a.getCountryName());
-                                }
-                                if (sb.length() > 0) {
-                                    label = sb.toString();
+                                String formatted =
+                                        PlaceLabelFormatter.fromAddress(addresses.get(0));
+                                if (formatted != null && !formatted.isEmpty()) {
+                                    label = formatted;
                                 }
                             }
                         } catch (IOException ignored) {

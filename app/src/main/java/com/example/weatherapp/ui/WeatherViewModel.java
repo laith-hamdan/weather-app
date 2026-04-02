@@ -12,12 +12,15 @@ import com.example.weatherapp.api.WeatherRepository;
 import com.example.weatherapp.data.FavoritesStore;
 import com.example.weatherapp.data.LastPlaceStore;
 import com.example.weatherapp.location.LocationHelper;
+import com.example.weatherapp.location.PlaceNameLocalizer;
 import com.example.weatherapp.model.FavoritePlace;
 import com.example.weatherapp.model.ParsedForecast;
 import com.example.weatherapp.model.Place;
+import com.example.weatherapp.util.AppLocale;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -41,6 +44,9 @@ public final class WeatherViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> locationBanner = new MutableLiveData<>(false);
     private final MutableLiveData<List<GeocodingResponseDto.Result>> searchResults =
             new MutableLiveData<>(new ArrayList<>());
+
+    /** Last UI language we resolved the place title for (see {@link #onUiReady()}). */
+    private String lastResolvedUiLanguageTag;
 
     public WeatherViewModel(@NonNull Application application) {
         super(application);
@@ -86,6 +92,57 @@ public final class WeatherViewModel extends AndroidViewModel {
 
     public void refreshFavoritesList() {
         favorites.setValue(favoritesStore.loadAll());
+    }
+
+    /**
+     * Call when the weather screen is shown. Safe across configuration changes (e.g. language):
+     * does not restart GPS / fallback if a place is already selected.
+     */
+    public void onUiReady() {
+        refreshFavoritesList();
+        if (place.getValue() != null) {
+            String nowTag = AppLocale.currentTag();
+            if (lastResolvedUiLanguageTag == null) {
+                lastResolvedUiLanguageTag = nowTag;
+            } else if (!lastResolvedUiLanguageTag.equalsIgnoreCase(nowTag)) {
+                refreshPlaceNameForCurrentLocale();
+            }
+            return;
+        }
+        bootstrapFromLocationOrFallback();
+    }
+
+    /**
+     * Re-fetch a display name for the current coordinates using {@link AppLocale#currentLocale()}.
+     */
+    public void refreshPlaceNameForCurrentLocale() {
+        Place current = place.getValue();
+        if (current == null) {
+            return;
+        }
+        final double lat = current.latitude;
+        final double lon = current.longitude;
+        final boolean fromGps = current.fromDeviceLocation;
+        final Locale locale = AppLocale.currentLocale();
+        final String localeTag = locale.toLanguageTag();
+        executor.execute(
+                () -> {
+                    String label =
+                            PlaceNameLocalizer.resolve(
+                                    getApplication(), repository, lat, lon, locale);
+                    if (label == null || label.isEmpty()) {
+                        return;
+                    }
+                    Place updated = new Place(label, lat, lon, fromGps);
+                    mainHandler.post(
+                            () -> {
+                                place.setValue(updated);
+                                lastPlaceStore.save(updated);
+                                favoritesStore.updateDisplayNameAt(lat, lon, label);
+                                refreshFavoritesList();
+                                lastResolvedUiLanguageTag = localeTag;
+                            });
+                });
     }
 
     public void bootstrapFromLocationOrFallback() {
@@ -156,6 +213,7 @@ public final class WeatherViewModel extends AndroidViewModel {
     private void applyPlaceAndFetch(@NonNull Place p) {
         lastPlaceStore.save(p);
         place.setValue(p);
+        lastResolvedUiLanguageTag = AppLocale.currentTag();
         fetchForecastForCurrentPlace();
     }
 
@@ -197,6 +255,7 @@ public final class WeatherViewModel extends AndroidViewModel {
     public void selectPlace(@NonNull Place p) {
         lastPlaceStore.save(p);
         place.setValue(p);
+        lastResolvedUiLanguageTag = AppLocale.currentTag();
         fetchForecastForCurrentPlace();
     }
 

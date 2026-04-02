@@ -3,6 +3,8 @@ package com.example.weatherapp.ui;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -50,6 +52,10 @@ public final class WeatherFragment extends Fragment {
     private SearchResultsAdapter searchAdapter;
     private androidx.appcompat.app.AlertDialog searchDialog;
 
+    private final Handler searchDebounceHandler = new Handler(Looper.getMainLooper());
+    private Runnable pendingSearchRunnable;
+    private static final long SEARCH_DEBOUNCE_MS = 450L;
+
     private final ActivityResultLauncher<String[]> requestLocationPermissions =
             registerForActivityResult(
                     new ActivityResultContracts.RequestMultiplePermissions(),
@@ -83,7 +89,7 @@ public final class WeatherFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel =
                 new ViewModelProvider(
-                                this,
+                                requireActivity(),
                                 ViewModelProvider.AndroidViewModelFactory.getInstance(
                                         requireActivity().getApplication()))
                         .get(WeatherViewModel.class);
@@ -156,7 +162,7 @@ public final class WeatherFragment extends Fragment {
                         Lifecycle.State.RESUMED);
 
         observeViewModel();
-        viewModel.bootstrapFromLocationOrFallback();
+        viewModel.onUiReady();
     }
 
     private void showLanguageDialog() {
@@ -376,14 +382,27 @@ public final class WeatherFragment extends Fragment {
 
                     @Override
                     public void afterTextChanged(Editable s) {
-                        if (s != null && s.length() >= 2) {
-                            viewModel.searchPlaces(s.toString());
+                        if (pendingSearchRunnable != null) {
+                            searchDebounceHandler.removeCallbacks(pendingSearchRunnable);
                         }
+                        final String text = s != null ? s.toString() : "";
+                        pendingSearchRunnable =
+                                () -> {
+                                    if (meetsMinSearchLength(text)) {
+                                        viewModel.searchPlaces(text);
+                                    }
+                                };
+                        searchDebounceHandler.postDelayed(
+                                pendingSearchRunnable, SEARCH_DEBOUNCE_MS);
                     }
                 });
 
         searchDialog.setOnDismissListener(
                 dialog -> {
+                    if (pendingSearchRunnable != null) {
+                        searchDebounceHandler.removeCallbacks(pendingSearchRunnable);
+                    }
+                    pendingSearchRunnable = null;
                     searchAdapter = null;
                     searchDialog = null;
                 });
@@ -392,10 +411,21 @@ public final class WeatherFragment extends Fragment {
     }
 
     private void runSearch(DialogSearchBinding d) {
+        if (pendingSearchRunnable != null) {
+            searchDebounceHandler.removeCallbacks(pendingSearchRunnable);
+        }
         CharSequence q = d.inputSearch.getText();
-        if (q != null && q.length() >= 2) {
+        if (meetsMinSearchLength(q)) {
             viewModel.searchPlaces(q.toString());
         }
+    }
+
+    private static boolean meetsMinSearchLength(CharSequence s) {
+        if (s == null) {
+            return false;
+        }
+        String t = s.toString().trim();
+        return t.codePointCount(0, t.length()) >= 2;
     }
 
     @Override

@@ -58,4 +58,20 @@ public final class FavoritesStore {
         list.removeIf(f -> id.equals(f.id));
         saveAll(list);
     }
+
+    /** Updates the saved label for any favorite at the same coordinates (e.g. after locale change). */
+    public void updateDisplayNameAt(double latitude, double longitude, @NonNull String displayName) {
+        List<FavoritePlace> list = loadAll();
+        boolean changed = false;
+        for (FavoritePlace f : list) {
+            if (Math.abs(f.latitude - latitude) < 1e-5
+                    && Math.abs(f.longitude - longitude) < 1e-5) {
+                f.displayName = displayName;
+                changed = true;
+            }
+        }
+        if (changed) {
+            saveAll(list);
+        }
+    }
 }
