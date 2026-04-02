@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Weather</string>
+    <string name="default_area_name">West Jutland</string>
+    <string name="location_banner_message">Turn on location to see weather for where you are right now.</string>
+    <string name="enable_location">Allow</string>
+    <string name="location_unavailable">Could not get your location. Try search or favorites.</string>
+    <string name="error_generic">Something went wrong</string>
+    <string name="section_current_details">Right now</string>
+    <string name="section_today_hourly">Today by hour</string>
+    <string name="section_favorites">Saved places</string>
+    <string name="add_favorite">Save this place</string>
+    <string name="remove_favorite">Remove</string>
+    <string name="search_hint">Search city or region</string>
+    <string name="menu_search">Search</string>
+    <string name="search_title">Find a place</string>
+    <string name="search_empty">No results</string>
+    <string name="updated_at">Updated %1$s</string>
+    <string name="today_summary">Today: %1$s / %2$s · Rain %3$s mm · Wind up to %4$s km/h</string>
+    <string name="metric_humidity">Humidity\n%1$d%%</string>
+    <string name="metric_wind">Wind\n%1$.0f km/h</string>
+    <string name="metric_precip">Precip.\n%1$.1f mm</string>
+    <string name="metric_cloud">Clouds\n%1$d%%</string>
+    <string name="metric_visibility">Visibility\n%1$.1f km</string>
+    <string name="permission_rationale">Location is used only to show local weather when you open the app.</string>
+</resources>
