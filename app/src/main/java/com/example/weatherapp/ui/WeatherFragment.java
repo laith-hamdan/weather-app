@@ -17,7 +17,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
+import androidx.core.os.LocaleListCompat;
 import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
@@ -143,6 +145,10 @@ public final class WeatherFragment extends Fragment {
                                     showSearchDialog();
                                     return true;
                                 }
+                                if (item.getItemId() == R.id.action_language) {
+                                    showLanguageDialog();
+                                    return true;
+                                }
                                 return false;
                             }
                         },
@@ -151,6 +157,59 @@ public final class WeatherFragment extends Fragment {
 
         observeViewModel();
         viewModel.bootstrapFromLocationOrFallback();
+    }
+
+    private void showLanguageDialog() {
+        String[] items =
+                new String[] {
+                    getString(R.string.language_english),
+                    getString(R.string.language_arabic),
+                    getString(R.string.language_follow_system),
+                };
+        int checked = currentLanguageDialogIndex();
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.language_dialog_title)
+                .setSingleChoiceItems(
+                        items,
+                        checked,
+                        (dialog, which) -> {
+                            switch (which) {
+                                case 0:
+                                    AppCompatDelegate.setApplicationLocales(
+                                            LocaleListCompat.forLanguageTags("en"));
+                                    break;
+                                case 1:
+                                    AppCompatDelegate.setApplicationLocales(
+                                            LocaleListCompat.forLanguageTags("ar"));
+                                    break;
+                                default:
+                                    AppCompatDelegate.setApplicationLocales(
+                                            LocaleListCompat.getEmptyLocaleList());
+                                    break;
+                            }
+                            dialog.dismiss();
+                        })
+                .setNegativeButton(android.R.string.cancel, (d, w) -> d.dismiss())
+                .show();
+    }
+
+    private int currentLanguageDialogIndex() {
+        LocaleListCompat locales = AppCompatDelegate.getApplicationLocales();
+        if (locales == null || locales.isEmpty()) {
+            return 2;
+        }
+        Locale loc = locales.get(0);
+        if (loc == null) {
+            return 2;
+        }
+        String lang = loc.getLanguage();
+        if ("ar".equals(lang)) {
+            return 1;
+        }
+        if ("en".equals(lang)) {
+            return 0;
+        }
+        return 2;
     }
 
     private void requestLocationIfNeeded() {
@@ -248,8 +307,10 @@ public final class WeatherFragment extends Fragment {
     private void bindForecast(@NonNull ParsedForecast f) {
         WeatherSnapshot c = f.currentHour;
         binding.textTemperature.setText(String.format(Locale.getDefault(), "%.0f°", c.temperatureC));
-        binding.textCondition.setText(WeatherCodeMapper.description(c.weatherCode));
+        binding.textCondition.setText(WeatherCodeMapper.description(requireContext(), c.weatherCode));
         binding.imageHeroWeather.setImageResource(WeatherCodeMapper.iconRes(c.weatherCode));
+        binding.imageHeroWeather.setContentDescription(
+                WeatherCodeMapper.description(requireContext(), c.weatherCode));
 
         DateFormat tf = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault());
         binding.textUpdated.setText(

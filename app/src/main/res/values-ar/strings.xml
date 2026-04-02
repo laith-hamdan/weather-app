@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">الطقس</string>
+    <string name="default_area_name">يوتلاند الغربية</string>
+    <string name="location_banner_message">فعّل الموقع لعرض طقس منطقتك الحالية.</string>
+    <string name="enable_location">سماح</string>
+    <string name="location_unavailable">تعذر تحديد موقعك. جرّب البحث أو الأماكن المفضلة.</string>
+    <string name="error_generic">حدث خطأ ما</string>
+    <string name="section_current_details">الآن</string>
+    <string name="section_today_hourly">اليوم حسب الساعة</string>
+    <string name="section_favorites">أماكن محفوظة</string>
+    <string name="add_favorite">حفظ هذا المكان</string>
+    <string name="remove_favorite">إزالة</string>
+    <string name="search_hint">ابحث عن مدينة أو منطقة</string>
+    <string name="menu_search">بحث</string>
+    <string name="menu_language">اللغة</string>
+    <string name="language_dialog_title">لغة التطبيق</string>
+    <string name="language_english">English</string>
+    <string name="language_arabic">العربية</string>
+    <string name="language_follow_system">لغة الجهاز</string>
+    <string name="search_title">اختر مكاناً</string>
+    <string name="search_empty">لا توجد نتائج</string>
+    <string name="updated_at">تم التحديث %1$s</string>
+    <string name="today_summary">اليوم: %1$s / %2$s · أمطار %3$s مم · رياح حتى %4$s كم/س</string>
+    <string name="metric_humidity">الرطوبة\n%1$d%%</string>
+    <string name="metric_wind">الرياح\n%1$.0f كم/س</string>
+    <string name="metric_precip">الهطول\n%1$.1f مم</string>
+    <string name="metric_cloud">الغيوم\n%1$d%%</string>
+    <string name="metric_visibility">مدى الرؤية\n%1$.1f كم</string>
+    <string name="permission_rationale">نستخدم الموقع فقط لعرض الطقس المحلي عند فتح التطبيق.</string>
+
+    <string name="wmo_clear">صافٍ</string>
+    <string name="wmo_mainly_clear">صافٍ غالباً</string>
+    <string name="wmo_partly_cloudy">غائم جزئياً</string>
+    <string name="wmo_overcast">غائم بالكامل</string>
+    <string name="wmo_fog">ضباب</string>
+    <string name="wmo_drizzle">رذاذ</string>
+    <string name="wmo_rain">مطر</string>
+    <string name="wmo_snow">ثلج</string>
+    <string name="wmo_rain_showers">زخات مطر</string>
+    <string name="wmo_snow_showers">زخات ثلج</string>
+    <string name="wmo_thunderstorm">عاصفة رعدية</string>
+    <string name="wmo_generic">الطقس</string>
+</resources>

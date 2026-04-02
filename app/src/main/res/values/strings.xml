@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Weather</string>
     <string name="default_area_name">West Jutland</string>
@@ -12,6 +13,11 @@
     <string name="remove_favorite">Remove</string>
     <string name="search_hint">Search city or region</string>
     <string name="menu_search">Search</string>
+    <string name="menu_language">Language</string>
+    <string name="language_dialog_title">App language</string>
+    <string name="language_english">English</string>
+    <string name="language_arabic">العربية</string>
+    <string name="language_follow_system">Use device language</string>
     <string name="search_title">Find a place</string>
     <string name="search_empty">No results</string>
     <string name="updated_at">Updated %1$s</string>
@@ -22,4 +28,17 @@
     <string name="metric_cloud">Clouds\n%1$d%%</string>
     <string name="metric_visibility">Visibility\n%1$.1f km</string>
     <string name="permission_rationale">Location is used only to show local weather when you open the app.</string>
+
+    <string name="wmo_clear">Clear</string>
+    <string name="wmo_mainly_clear">Mainly clear</string>
+    <string name="wmo_partly_cloudy">Partly cloudy</string>
+    <string name="wmo_overcast">Overcast</string>
+    <string name="wmo_fog">Fog</string>
+    <string name="wmo_drizzle">Drizzle</string>
+    <string name="wmo_rain">Rain</string>
+    <string name="wmo_snow">Snow</string>
+    <string name="wmo_rain_showers">Rain showers</string>
+    <string name="wmo_snow_showers">Snow showers</string>
+    <string name="wmo_thunderstorm">Thunderstorm</string>
+    <string name="wmo_generic">Weather</string>
 </resources>

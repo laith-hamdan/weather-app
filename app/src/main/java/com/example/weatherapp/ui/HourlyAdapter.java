@@ -57,6 +57,8 @@ public final class HourlyAdapter extends RecyclerView.Adapter<HourlyAdapter.Hold
             binding.textTemp.setText(
                     String.format(Locale.getDefault(), "%.0f°", s.temperatureC));
             binding.imageIcon.setImageResource(WeatherCodeMapper.iconRes(s.weatherCode));
+            binding.imageIcon.setContentDescription(
+                    WeatherCodeMapper.description(binding.getRoot().getContext(), s.weatherCode));
         }
     }
 }
