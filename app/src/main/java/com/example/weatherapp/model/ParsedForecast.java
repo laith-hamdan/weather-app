@@ -15,6 +15,8 @@ public final class ParsedForecast {
     public final double todayMaxWindKmh;
     public final int headlineWeatherCode;
     public final long fetchedAtEpochMs;
+    @NonNull
+    public final List<DailyForecast> tenDayForecast;
 
     public ParsedForecast(
             @NonNull WeatherSnapshot currentHour,
@@ -24,7 +26,8 @@ public final class ParsedForecast {
             double todayPrecipitationSumMm,
             double todayMaxWindKmh,
             int headlineWeatherCode,
-            long fetchedAtEpochMs) {
+            long fetchedAtEpochMs,
+            @NonNull List<DailyForecast> tenDayForecast) {
         this.currentHour = currentHour;
         this.todayHourly = Collections.unmodifiableList(todayHourly);
         this.todayMinTemp = todayMinTemp;
@@ -33,5 +36,6 @@ public final class ParsedForecast {
         this.todayMaxWindKmh = todayMaxWindKmh;
         this.headlineWeatherCode = headlineWeatherCode;
         this.fetchedAtEpochMs = fetchedAtEpochMs;
+        this.tenDayForecast = Collections.unmodifiableList(tenDayForecast);
     }
 }

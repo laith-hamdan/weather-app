@@ -3,17 +3,12 @@ package com.example.weatherapp.ui;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -30,7 +25,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.weatherapp.R;
-import com.example.weatherapp.databinding.DialogSearchBinding;
+import com.example.weatherapp.api.GeocodingResponseDto;
 import com.example.weatherapp.databinding.FragmentWeatherBinding;
 import com.example.weatherapp.model.FavoritePlace;
 import com.example.weatherapp.model.ParsedForecast;
@@ -49,12 +44,7 @@ public final class WeatherFragment extends Fragment {
     private WeatherViewModel viewModel;
     private HourlyAdapter hourlyAdapter;
     private FavoritesAdapter favoritesAdapter;
-    private SearchResultsAdapter searchAdapter;
-    private androidx.appcompat.app.AlertDialog searchDialog;
-
-    private final Handler searchDebounceHandler = new Handler(Looper.getMainLooper());
-    private Runnable pendingSearchRunnable;
-    private static final long SEARCH_DEBOUNCE_MS = 450L;
+    private DailyAdapter dailyAdapter;
 
     private final ActivityResultLauncher<String[]> requestLocationPermissions =
             registerForActivityResult(
@@ -133,6 +123,11 @@ public final class WeatherFragment extends Fragment {
         binding.recyclerFavorites.setLayoutManager(favLayout);
         binding.recyclerFavorites.setAdapter(favoritesAdapter);
 
+        dailyAdapter = new DailyAdapter();
+        binding.recyclerDaily.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.recyclerDaily.setAdapter(dailyAdapter);
+        binding.recyclerDaily.setNestedScrollingEnabled(false);
+
         binding.swipeRefresh.setOnRefreshListener(() -> viewModel.fetchForecastForCurrentPlace());
         binding.buttonEnableLocation.setOnClickListener(v -> requestLocationIfNeeded());
         binding.fabFavorite.setOnClickListener(v -> viewModel.addCurrentPlaceToFavorites());
@@ -148,7 +143,7 @@ public final class WeatherFragment extends Fragment {
                             @Override
                             public boolean onMenuItemSelected(@NonNull MenuItem item) {
                                 if (item.getItemId() == R.id.action_search) {
-                                    showSearchDialog();
+                                    showSearchSheet();
                                     return true;
                                 }
                                 if (item.getItemId() == R.id.action_language) {
@@ -299,15 +294,6 @@ public final class WeatherFragment extends Fragment {
                                 binding.cardLocationBanner.setVisibility(
                                         Boolean.TRUE.equals(show) ? View.VISIBLE : View.GONE));
 
-        viewModel
-                .getSearchResults()
-                .observe(
-                        getViewLifecycleOwner(),
-                        results -> {
-                            if (searchAdapter != null) {
-                                searchAdapter.submit(results);
-                            }
-                        });
     }
 
     private void bindForecast(@NonNull ParsedForecast f) {
@@ -338,94 +324,15 @@ public final class WeatherFragment extends Fragment {
         binding.metricVisibility.setText(getString(R.string.metric_visibility, visKm));
 
         hourlyAdapter.submit(f.todayHourly);
-    }
-
-    private void showSearchDialog() {
-        if (searchDialog != null && searchDialog.isShowing()) {
-            return;
-        }
-        DialogSearchBinding d = DialogSearchBinding.inflate(getLayoutInflater());
-        searchAdapter =
-                new SearchResultsAdapter(
-                        result -> {
-                            viewModel.selectGeocodingResult(result);
-                            if (searchDialog != null) {
-                                searchDialog.dismiss();
-                            }
-                        });
-        d.recyclerResults.setLayoutManager(new LinearLayoutManager(requireContext()));
-        d.recyclerResults.setAdapter(searchAdapter);
-
-        searchDialog =
-                new MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.search_title)
-                        .setView(d.getRoot())
-                        .setNegativeButton(android.R.string.cancel, (dialog, w) -> dialog.dismiss())
-                        .create();
-
-        d.inputSearch.setOnEditorActionListener(
-                (v, actionId, event) -> {
-                    if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                        runSearch(d);
-                        return true;
-                    }
-                    return false;
-                });
-
-        d.inputSearch.addTextChangedListener(
-                new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        if (pendingSearchRunnable != null) {
-                            searchDebounceHandler.removeCallbacks(pendingSearchRunnable);
-                        }
-                        final String text = s != null ? s.toString() : "";
-                        pendingSearchRunnable =
-                                () -> {
-                                    if (meetsMinSearchLength(text)) {
-                                        viewModel.searchPlaces(text);
-                                    }
-                                };
-                        searchDebounceHandler.postDelayed(
-                                pendingSearchRunnable, SEARCH_DEBOUNCE_MS);
-                    }
-                });
-
-        searchDialog.setOnDismissListener(
-                dialog -> {
-                    if (pendingSearchRunnable != null) {
-                        searchDebounceHandler.removeCallbacks(pendingSearchRunnable);
-                    }
-                    pendingSearchRunnable = null;
-                    searchAdapter = null;
-                    searchDialog = null;
-                });
-
-        searchDialog.show();
-    }
-
-    private void runSearch(DialogSearchBinding d) {
-        if (pendingSearchRunnable != null) {
-            searchDebounceHandler.removeCallbacks(pendingSearchRunnable);
-        }
-        CharSequence q = d.inputSearch.getText();
-        if (meetsMinSearchLength(q)) {
-            viewModel.searchPlaces(q.toString());
+        if (f.tenDayForecast != null && !f.tenDayForecast.isEmpty()) {
+            dailyAdapter.submit(f.tenDayForecast);
         }
     }
 
-    private static boolean meetsMinSearchLength(CharSequence s) {
-        if (s == null) {
-            return false;
-        }
-        String t = s.toString().trim();
-        return t.codePointCount(0, t.length()) >= 2;
+    private void showSearchSheet() {
+        SearchBottomSheet sheet = new SearchBottomSheet();
+        sheet.setOnPlaceSelectedListener(result -> viewModel.selectGeocodingResult(result));
+        sheet.show(getChildFragmentManager(), "search");
     }
 
     @Override

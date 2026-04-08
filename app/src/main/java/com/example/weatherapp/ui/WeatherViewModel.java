@@ -44,6 +44,8 @@ public final class WeatherViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> locationBanner = new MutableLiveData<>(false);
     private final MutableLiveData<List<GeocodingResponseDto.Result>> searchResults =
             new MutableLiveData<>(new ArrayList<>());
+    private Runnable pendingSearchRunnable;
+    private static final long SEARCH_DEBOUNCE_MS = 450L;
 
     /** Last UI language we resolved the place title for (see {@link #onUiReady()}). */
     private String lastResolvedUiLanguageTag;
@@ -280,6 +282,27 @@ public final class WeatherViewModel extends AndroidViewModel {
     public void removeFavorite(@NonNull String id) {
         favoritesStore.removeById(id);
         refreshFavoritesList();
+    }
+
+    /** Debounced entry point — replaces direct calls from UI. */
+    public void submitSearchQuery(@NonNull String query) {
+        if (pendingSearchRunnable != null) {
+            mainHandler.removeCallbacks(pendingSearchRunnable);
+        }
+        String trimmed = query.trim();
+        if (trimmed.codePointCount(0, trimmed.length()) < 2) {
+            return;
+        }
+        pendingSearchRunnable = () -> searchPlaces(trimmed);
+        mainHandler.postDelayed(pendingSearchRunnable, SEARCH_DEBOUNCE_MS);
+    }
+
+    public void clearSearchResults() {
+        if (pendingSearchRunnable != null) {
+            mainHandler.removeCallbacks(pendingSearchRunnable);
+            pendingSearchRunnable = null;
+        }
+        searchResults.setValue(new ArrayList<>());
     }
 
     public void searchPlaces(@NonNull String query) {

@@ -12,7 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        app:liftOnScroll="false">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -44,6 +45,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- Location permission banner -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_location_banner"
                     android:layout_width="match_parent"
@@ -78,12 +80,13 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+                <!-- Hero card: centered weather display -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_hero"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:cardBackgroundColor="?attr/colorPrimaryContainer"
-                    app:cardCornerRadius="20dp"
+                    app:cardCornerRadius="24dp"
                     app:cardElevation="6dp"
                     app:strokeColor="?attr/colorOutlineVariant"
                     app:strokeWidth="1dp">
@@ -91,60 +94,57 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:paddingStart="20dp"
+                        android:paddingTop="24dp"
+                        android:paddingEnd="20dp"
+                        android:paddingBottom="20dp">
 
                         <TextView
                             android:id="@+id/text_place_name"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                            android:gravity="center"
+                            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                            android:textStyle="bold"
                             tools:text="Copenhagen" />
 
                         <TextView
                             android:id="@+id/text_updated"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
+                            android:alpha="0.7"
+                            android:gravity="center"
                             android:textAppearance="?attr/textAppearanceBodySmall"
-                            android:textColor="?android:attr/textColorSecondary"
                             tools:text="Updated 12:30" />
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <ImageView
+                            android:id="@+id/image_hero_weather"
+                            android:layout_width="96dp"
+                            android:layout_height="96dp"
+                            android:layout_marginTop="16dp"
+                            android:contentDescription="@null"
+                            tools:src="@drawable/ic_weather_clear" />
+
+                        <TextView
+                            android:id="@+id/text_temperature"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
+                            android:layout_marginTop="4dp"
+                            android:textAppearance="?attr/textAppearanceDisplayMedium"
+                            android:textStyle="bold"
+                            tools:text="12°" />
 
-                            <ImageView
-                                android:id="@+id/image_hero_weather"
-                                android:layout_width="72dp"
-                                android:layout_height="72dp"
-                                android:contentDescription="@null"
-                                tools:src="@drawable/ic_weather_clear" />
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="16dp"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/text_temperature"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textAppearance="?attr/textAppearanceDisplaySmall"
-                                    tools:text="12°" />
-
-                                <TextView
-                                    android:id="@+id/text_condition"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textAppearance="?attr/textAppearanceTitleMedium"
-                                    tools:text="Partly cloudy" />
-                            </LinearLayout>
-                        </LinearLayout>
+                        <TextView
+                            android:id="@+id/text_condition"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:gravity="center"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            tools:text="Partly cloudy" />
 
                         <com.google.android.material.divider.MaterialDivider
                             android:layout_width="match_parent"
@@ -156,11 +156,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="12dp"
+                            android:gravity="center"
                             android:textAppearance="?attr/textAppearanceBodyLarge"
-                            tools:text="Today: 8° / 14° · Rain 2 mm" />
+                            tools:text="Today: 8° / 14° · Rain 2 mm · Wind up to 18 km/h" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+                <!-- Current conditions card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -194,7 +196,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                tools:text="Humidity\n62%" />
+                                tools:text="Humidity&#10;62%" />
 
                             <TextView
                                 android:id="@+id/metric_wind"
@@ -202,7 +204,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                tools:text="Wind\n24 km/h" />
+                                tools:text="Wind&#10;24 km/h" />
 
                             <TextView
                                 android:id="@+id/metric_precip"
@@ -210,7 +212,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                tools:text="Precip.\n0 mm" />
+                                tools:text="Precip.&#10;0 mm" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -225,7 +227,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                tools:text="Clouds\n40%" />
+                                tools:text="Clouds&#10;40%" />
 
                             <TextView
                                 android:id="@+id/metric_visibility"
@@ -233,7 +235,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                tools:text="Visibility\n24 km" />
+                                tools:text="Visibility&#10;24 km" />
 
                             <Space
                                 android:layout_width="0dp"
@@ -243,6 +245,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+                <!-- Today by hour -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -258,6 +261,34 @@
                     android:nestedScrollingEnabled="false"
                     tools:listitem="@layout/item_hour" />
 
+                <!-- 10-day forecast -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/label_10day_forecast"
+                    android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_daily"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        tools:listitem="@layout/item_day" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Saved places -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -293,8 +324,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:visibility="gone"
         android:indeterminate="true"
+        android:visibility="gone"
         tools:visibility="visible" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

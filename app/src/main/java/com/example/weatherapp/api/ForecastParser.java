@@ -1,16 +1,21 @@
 package com.example.weatherapp.api;
 
+import com.example.weatherapp.model.DailyForecast;
 import com.example.weatherapp.model.ParsedForecast;
 import com.example.weatherapp.model.WeatherSnapshot;
 
 import java.io.IOException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public final class ForecastParser {
     private static final DateTimeFormatter ISO_LOCAL = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -32,44 +37,127 @@ public final class ForecastParser {
             currentIdx = n - 1;
         }
 
-        LocalDate todayUtc = ZonedDateTime.now(UTC).toLocalDate();
-        List<WeatherSnapshot> today = new ArrayList<>();
-        double minT = Double.POSITIVE_INFINITY;
-        double maxT = Double.NEGATIVE_INFINITY;
-        double precipSum = 0;
-        double maxWind = 0;
+        // Group hourly indices by calendar date (first 10 chars of ISO string)
+        LinkedHashMap<String, List<Integer>> byDay = groupIndicesByDay(times);
 
-        for (int i = 0; i < n; i++) {
-            ZonedDateTime z = parseUtc(times.get(i));
-            if (!z.toLocalDate().equals(todayUtc)) {
+        LocalDate todayUtc = ZonedDateTime.now(UTC).toLocalDate();
+        List<DailyForecast> tenDayForecast = new ArrayList<>();
+        List<WeatherSnapshot> todayHourly = new ArrayList<>();
+        double todayMinT = Double.POSITIVE_INFINITY;
+        double todayMaxT = Double.NEGATIVE_INFINITY;
+        double todayPrecipSum = 0;
+        double todayMaxWind = 0;
+
+        int dayIndex = 0;
+        for (Map.Entry<String, List<Integer>> entry : byDay.entrySet()) {
+            if (dayIndex >= 10) break;
+            String dateStr = entry.getKey();
+            List<Integer> indices = entry.getValue();
+
+            double minT = Double.POSITIVE_INFINITY;
+            double maxT = Double.NEGATIVE_INFINITY;
+            double precipSum = 0;
+            double maxWind = 0;
+            List<WeatherSnapshot> daySnaps = new ArrayList<>();
+
+            for (int idx : indices) {
+                WeatherSnapshot snap = buildSnapshot(dto, idx);
+                daySnaps.add(snap);
+                minT = Math.min(minT, snap.temperatureC);
+                maxT = Math.max(maxT, snap.temperatureC);
+                precipSum += snap.precipitationMm;
+                maxWind = Math.max(maxWind, snap.windSpeedKmh);
+            }
+
+            if (daySnaps.isEmpty()) {
+                dayIndex++;
                 continue;
             }
-            WeatherSnapshot snap = buildSnapshot(dto, i);
-            today.add(snap);
-            minT = Math.min(minT, snap.temperatureC);
-            maxT = Math.max(maxT, snap.temperatureC);
-            precipSum += snap.precipitationMm;
-            maxWind = Math.max(maxWind, snap.windSpeedKmh);
+
+            int dominantCode = dominantWeatherCode(dto.hourly.weathercode, indices);
+            LocalDate date = LocalDate.parse(dateStr);
+            int calDow = toCalendarDayOfWeek(date.getDayOfWeek());
+            boolean isToday = date.equals(todayUtc);
+
+            tenDayForecast.add(new DailyForecast(
+                    dateStr, calDow, minT, maxT, dominantCode, precipSum, maxWind, isToday));
+
+            if (isToday) {
+                todayHourly = daySnaps;
+                todayMinT = minT;
+                todayMaxT = maxT;
+                todayPrecipSum = precipSum;
+                todayMaxWind = maxWind;
+            }
+            dayIndex++;
         }
 
-        if (today.isEmpty()) {
+        // Fallback if today wasn't found in grouped data
+        if (todayHourly.isEmpty()) {
             WeatherSnapshot only = buildSnapshot(dto, currentIdx);
-            today.add(only);
-            minT = maxT = only.temperatureC;
-            precipSum = only.precipitationMm;
-            maxWind = only.windSpeedKmh;
+            todayHourly.add(only);
+            todayMinT = todayMaxT = only.temperatureC;
+            todayPrecipSum = only.precipitationMm;
+            todayMaxWind = only.windSpeedKmh;
         }
 
         WeatherSnapshot current = buildSnapshot(dto, currentIdx);
         return new ParsedForecast(
                 current,
-                today,
-                minT,
-                maxT,
-                precipSum,
-                maxWind,
+                todayHourly,
+                todayMinT,
+                todayMaxT,
+                todayPrecipSum,
+                todayMaxWind,
                 current.weatherCode,
-                System.currentTimeMillis());
+                System.currentTimeMillis(),
+                tenDayForecast);
+    }
+
+    /** Groups hourly time-string indices into day buckets, preserving chronological order. */
+    private static LinkedHashMap<String, List<Integer>> groupIndicesByDay(List<String> times) {
+        LinkedHashMap<String, List<Integer>> map = new LinkedHashMap<>();
+        for (int i = 0; i < times.size(); i++) {
+            String dateKey = times.get(i).substring(0, 10); // "2026-04-08"
+            if (!map.containsKey(dateKey)) {
+                map.put(dateKey, new ArrayList<>());
+            }
+            map.get(dateKey).add(i);
+        }
+        return map;
+    }
+
+    /**
+     * Returns the most frequent weather code in the given index set.
+     * Ties are broken by choosing the highest (most severe) code.
+     */
+    private static int dominantWeatherCode(List<Double> weathercodes, List<Integer> indices) {
+        if (weathercodes == null || weathercodes.isEmpty()) return 0;
+        HashMap<Integer, Integer> freq = new HashMap<>();
+        for (int idx : indices) {
+            if (idx < weathercodes.size()) {
+                Double v = weathercodes.get(idx);
+                int code = v == null ? 0 : (int) Math.round(v);
+                freq.put(code, freq.getOrDefault(code, 0) + 1);
+            }
+        }
+        int best = 0;
+        int bestFreq = -1;
+        for (Map.Entry<Integer, Integer> e : freq.entrySet()) {
+            if (e.getValue() > bestFreq || (e.getValue() == bestFreq && e.getKey() > best)) {
+                best = e.getKey();
+                bestFreq = e.getValue();
+            }
+        }
+        return best;
+    }
+
+    /**
+     * Converts java.time DayOfWeek (ISO: Mon=1 … Sun=7) to
+     * java.util.Calendar day-of-week (Sun=1 … Sat=7) used by DateFormatSymbols.
+     */
+    private static int toCalendarDayOfWeek(DayOfWeek dow) {
+        return (dow.getValue() % 7) + 1;
     }
 
     private static int findCurrentHourIndex(List<String> times, ZonedDateTime nowUtcHour) {

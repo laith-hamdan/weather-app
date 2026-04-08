@@ -29,6 +29,12 @@
     <string name="metric_visibility">Visibility\n%1$.1f km</string>
     <string name="permission_rationale">Location is used only to show local weather when you open the app.</string>
 
+    <string name="label_10day_forecast">10-Day Forecast</string>
+    <string name="label_today">Today</string>
+    <string name="label_no_search_results">No results found</string>
+    <string name="label_saved_places">Saved Places</string>
+    <string name="label_search_hint">Search for a city…</string>
+
     <string name="wmo_clear">Clear</string>
     <string name="wmo_mainly_clear">Mainly clear</string>
     <string name="wmo_partly_cloudy">Partly cloudy</string>

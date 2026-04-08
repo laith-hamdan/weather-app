@@ -29,6 +29,12 @@
     <string name="metric_visibility">مدى الرؤية\n%1$.1f كم</string>
     <string name="permission_rationale">نستخدم الموقع فقط لعرض الطقس المحلي عند فتح التطبيق.</string>
 
+    <string name="label_10day_forecast">توقعات 10 أيام</string>
+    <string name="label_today">اليوم</string>
+    <string name="label_no_search_results">لا توجد نتائج</string>
+    <string name="label_saved_places">الأماكن المحفوظة</string>
+    <string name="label_search_hint">ابحث عن مدينة…</string>
+
     <string name="wmo_clear">صافٍ</string>
     <string name="wmo_mainly_clear">صافٍ غالباً</string>
     <string name="wmo_partly_cloudy">غائم جزئياً</string>
