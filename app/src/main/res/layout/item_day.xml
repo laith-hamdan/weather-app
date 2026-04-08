@@ -7,7 +7,15 @@
     android:paddingStart="16dp"
     android:paddingEnd="16dp">
 
-    <!-- Day name: start-anchored -->
+    <!-- Fixed-position guideline at 50% so the icon is always centred -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <!-- Day name: start-anchored, takes the left portion -->
     <TextView
         android:id="@+id/text_day_label"
         android:layout_width="0dp"
@@ -15,52 +23,47 @@
         android:textAppearance="?attr/textAppearanceLabelLarge"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/image_weather_icon"
-        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintEnd_toStartOf="@id/guideline_center"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Monday" />
 
-    <!-- Weather icon: centered in the row -->
-    <LinearLayout
-        android:id="@+id/icon_column"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
+    <!-- Weather icon: pinned to the centre guideline -->
+    <ImageView
+        android:id="@+id/image_weather_icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:contentDescription="@null"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/text_temp_range"
-        app:layout_constraintStart_toEndOf="@id/text_day_label"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintEnd_toEndOf="@id/guideline_center"
+        app:layout_constraintStart_toStartOf="@id/guideline_center"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_weather_clear" />
 
-        <ImageView
-            android:id="@+id/image_weather_icon"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:contentDescription="@null"
-            tools:src="@drawable/ic_weather_clear" />
-
-        <TextView
-            android:id="@+id/text_precip_badge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="?attr/colorPrimary"
-            android:textSize="10sp"
-            android:visibility="gone"
-            tools:text="3 mm"
-            tools:visibility="visible" />
-    </LinearLayout>
+    <!-- Precipitation badge: below the icon, also centred on the guideline -->
+    <TextView
+        android:id="@+id/text_precip_badge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="10sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/guideline_center"
+        app:layout_constraintStart_toStartOf="@id/guideline_center"
+        app:layout_constraintTop_toBottomOf="@id/image_weather_icon"
+        tools:text="3 mm"
+        tools:visibility="visible" />
 
     <!-- Temperature range: end-anchored -->
     <TextView
         android:id="@+id/text_temp_range"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:gravity="end"
         android:textAppearance="?attr/textAppearanceBodyLarge"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/guideline_center"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="28° / 19°" />
 

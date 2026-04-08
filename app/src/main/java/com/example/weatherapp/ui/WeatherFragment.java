@@ -25,11 +25,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.weatherapp.R;
-import com.example.weatherapp.api.GeocodingResponseDto;
 import com.example.weatherapp.databinding.FragmentWeatherBinding;
 import com.example.weatherapp.model.FavoritePlace;
 import com.example.weatherapp.model.ParsedForecast;
-import com.example.weatherapp.model.Place;
 import com.example.weatherapp.model.WeatherSnapshot;
 import com.example.weatherapp.util.WeatherCodeMapper;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;

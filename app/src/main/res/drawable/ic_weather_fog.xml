@@ -1,10 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Horizontal fog bars with rounded ends -->
     <path
-        android:fillColor="#CFD8DC"
-        android:pathData="M2,15h20v2H2v-2zM4,11h16v2H4v-2zM6,7h12v2H6V7z" />
+        android:pathData="M8,16h32"
+        android:strokeColor="#B0BEC5"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M12,22h28"
+        android:strokeColor="#CFD8DC"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M6,28h36"
+        android:strokeColor="#B0BEC5"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M10,34h24"
+        android:strokeColor="#CFD8DC"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round" />
 </vector>

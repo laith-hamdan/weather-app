@@ -115,7 +115,8 @@ public final class WeatherViewModel extends AndroidViewModel {
     }
 
     /**
-     * Re-fetch a display name for the current coordinates using {@link AppLocale#currentLocale()}.
+     * Re-fetch display names for the current place and all saved favorites
+     * using {@link AppLocale#currentLocale()}.
      */
     public void refreshPlaceNameForCurrentLocale() {
         Place current = place.getValue();
@@ -129,18 +130,36 @@ public final class WeatherViewModel extends AndroidViewModel {
         final String localeTag = locale.toLanguageTag();
         executor.execute(
                 () -> {
+                    // Re-localize the current place
                     String label =
                             PlaceNameLocalizer.resolve(
                                     getApplication(), repository, lat, lon, locale);
-                    if (label == null || label.isEmpty()) {
-                        return;
+                    // Re-localize all saved favorites
+                    List<FavoritePlace> favs = favoritesStore.loadAll();
+                    boolean favsChanged = false;
+                    for (FavoritePlace fav : favs) {
+                        String favLabel =
+                                PlaceNameLocalizer.resolve(
+                                        getApplication(), repository,
+                                        fav.latitude, fav.longitude, locale);
+                        if (favLabel != null && !favLabel.isEmpty()
+                                && !favLabel.equals(fav.displayName)) {
+                            fav.displayName = favLabel;
+                            favsChanged = true;
+                        }
                     }
-                    Place updated = new Place(label, lat, lon, fromGps);
+                    final boolean saveFavs = favsChanged;
+                    final List<FavoritePlace> updatedFavs = favs;
                     mainHandler.post(
                             () -> {
-                                place.setValue(updated);
-                                lastPlaceStore.save(updated);
-                                favoritesStore.updateDisplayNameAt(lat, lon, label);
+                                if (label != null && !label.isEmpty()) {
+                                    Place updated = new Place(label, lat, lon, fromGps);
+                                    place.setValue(updated);
+                                    lastPlaceStore.save(updated);
+                                }
+                                if (saveFavs) {
+                                    favoritesStore.saveAll(updatedFavs);
+                                }
                                 refreshFavoritesList();
                                 lastResolvedUiLanguageTag = localeTag;
                             });
